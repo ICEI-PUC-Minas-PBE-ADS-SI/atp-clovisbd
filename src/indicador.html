@@ -72,15 +72,32 @@
             display: inline-block;
             padding: 0 2rem;
         }
+
+
+      #slider{
+    position: absolute;
+    scroll-padding-bottom: 50px;
+    right: 0;
+    background: transparent;
+    width: 150px;
+    height: 50px;
+    animation: anima 20s linear infinite;
+ }
+ 
+ @keyframes anima{
+    from {right: 0}
+    to {right: 100%}
+ }
     </style>
 </head>
   <body>   
+    <iframe src="https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/68c608860e6249e08f2fca1789a13249" id="slider" width="100%" height="200"></iframe>
     <marquee> </marquee>
  
        <!-- Carrossel de notícias -->
     <div class="bg-blue-600 text-white py-3 overflow-hidden">
         <div class="news-scroll">
-            <div class="news-item"><iframe src="https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/68c608860e6249e08f2fca1789a13249" width="100%" height="200"></iframe>
+            <div class="news-item">
  </div>
             <div class="news-item">🚀 Webinar sobre desenvolvimento web acontecerá no próximo mês</div>
             <div class="news-item">💡 Dica: Use nossa API para integração rápida dos componentes</div>
