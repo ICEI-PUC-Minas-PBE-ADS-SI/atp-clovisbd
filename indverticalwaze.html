@@ -1,0 +1,22 @@
+<body>
+
+<div id="banner-container">
+  <object id="banner-object" data="https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/ef59ab37030546c0a8c3ccfc8c9a442c" type="text/html" width="100%" height="90"></object>
+</div>
+
+<script>
+  var pages = ["https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/68c608860e6249e08f2fca1789a13249", "https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/ef59ab37030546c0a8c3ccfc8c9a442c", "https://observatorio.infraestrutura.mg.gov.br/portal/apps/dashboards/68c608860e6249e08f2fca1789a13249"]; // Adicione aqui as URLs das páginas
+  var currentPageIndex = 0;
+  var bannerObject = document.getElementById("banner-object");
+
+  function changeBanner() {
+    currentPageIndex = (currentPageIndex + 1) % pages.length;
+    bannerObject.setAttribute("data", pages[currentPageIndex]);
+  }
+
+  // Troca a página a cada 5000 milissegundos (5 segundos)
+  setInterval(changeBanner, 10000);
+</script>
+
+</body>
+</html>
