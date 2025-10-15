@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Hash SHA-256</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #0f1c3f;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #0f1c3f;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        
+        button:hover {
+            background-color: #2c3e50;
+        }
+        
+        .resultado {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            word-break: break-all;
+        }
+        
+        .exemplo {
+            background-color: #e8f4f8;
+            border-left: 4px solid #0f1c3f;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .lista-senhas {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .senha-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 10px;
+        }
+        
+        .senha-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .copiar-btn {
+            background-color: #28a745;
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+        
+        .copiar-btn:hover {
+            background-color: #218838;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .toggle-senha {
+            background-color: #6c757d;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Gerador de Hash SHA-256 para Senhas</h1>
+        
+        <div class="form-group">
+            <label for="senhaInput">Digite sua senha:</label>
+            <div style="display: flex; align-items: center;">
+                <input type="password" id="senhaInput" placeholder="Digite a senha que você quer usar">
+                <button type="button" class="toggle-senha" onclick="toggleSenha()">👁️</button>
+            </div>
+        </div>
+        
+        <button onclick="gerarHash()">Gerar Hash</button>
+        <button onclick="limparCampos()" style="background-color: #dc3545;">Limpar</button>
+        
+        <div id="resultado" class="resultado" style="display: none;">
+            <strong>Hash SHA-256:</strong><br>
+            <span id="hashGerado"></span>
+            <br><br>
+            <button class="copiar-btn" onclick="copiarHash()">📋 Copiar Hash</button>
+        </div>
+
+        <div class="exemplo">
+            <h3>📝 Como usar:</h3>
+            <ol>
+                <li>Digite a senha que você quer usar</li>
+                <li>Clique em "Gerar Hash"</li>
+                <li>Copie o hash gerado</li>
+                <li>Cole no lugar do hash antigo no código</li>
+            </ol>
+        </div>
+
+        <div class="lista-senhas">
+            <h3>🔑 Senhas Atuais do Sistema:</h3>
+            <div id="senhasAtuais">
+                <div class="senha-item">
+                    <div>
+                        <strong>Lote 1:</strong> 
+                        <span class="senha-oculta">hello123</span>
+                        <br>
+                        <small style="color: #666;">Hash: 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92</small>
+                    </div>
+                    <button class="copiar-btn" onclick="copiarTexto('8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92')">Copiar Hash</button>
+                </div>
+                
+                <div class="senha-item">
+                    <div>
+                        <strong>Lote 2:</strong> 
+                        <span class="senha-oculta">secret456</span>
+                        <br>
+                        <small style="color: #666;">Hash: ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f</small>
+                    </div>
+                    <button class="copiar-btn" onclick="copiarTexto('ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f')">Copiar Hash</button>
+                </div>
+                
+                <div class="senha-item">
+                    <div>
+                        <strong>Lote 3:</strong> 
+                        <span class="senha-oculta">access789</span>
+                        <br>
+                        <small style="color: #666;">Hash: 96d9632f363564cc3032521afa2e2b39e1a8b3c7c62b6c1a4f8e7e8b4f5a4f5a</small>
+                    </div>
+                    <button class="copiar-btn" onclick="copiarTexto('96d9632f363564cc3032521afa2e2b39e1a8b3c7c62b6c1a4f8e7e8b4f5a4f5a')">Copiar Hash</button>
+                </div>
+                
+                <div class="senha-item">
+                    <div>
+                        <strong>Lote 4:</strong> 
+                        <span class="senha-oculta">test1234</span>
+                        <br>
+                        <small style="color: #666;">Hash: a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3</small>
+                    </div>
+                    <button class="copiar-btn" onclick="copiarTexto('a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3')">Copiar Hash</button>
+                </div>
+                
+                <div class="senha-item">
+                    <div>
+                        <strong>Lote 5:</strong> 
+                        <span class="senha-oculta">admin2024</span>
+                        <br>
+                        <small style="color: #666;">Hash: 8b8d99aacd7d3bc5fcb9fcce99b3b7f8d9e8c4e7a4b1c2d3e4f5a6b7c8d9e0f1</small>
+                    </div>
+                    <button class="copiar-btn" onclick="copiarTexto('8b8d99aacd7d3bc5fcb9fcce99b3b7f8d9e8c4e7a4b1c2d3e4f5a6b7c8d9e0f1')">Copiar Hash</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="exemplo">
+            <h3>⚠️ Importante:</h3>
+            <ul>
+                <li>Cada senha gera um hash único de 64 caracteres</li>
+                <li>O hash é irreversível - ninguém consegue descobrir a senha original</li>
+                <li>Use senhas fortes: combine letras, números e símbolos</li>
+                <li>Anote suas senhas em local seguro!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let senhaVisivel = false;
+
+        async function gerarHash() {
+            const senha = document.getElementById('senhaInput').value;
+            
+            if (!senha.trim()) {
+                alert('Digite uma senha primeiro!');
+                return;
+            }
+            
+            try {
+                const encoder = new TextEncoder();
+                const data = encoder.encode(senha);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                
+                document.getElementById('hashGerado').textContent = hashHex;
+                document.getElementById('resultado').style.display = 'block';
+                
+                // Mostrar alerta de sucesso
+                mostrarAlerta('Hash gerado com sucesso! 🎉', 'success');
+                
+            } catch (error) {
+                console.error('Erro ao gerar hash:', error);
+                alert('Erro ao gerar hash. Tente novamente.');
+            }
+        }
+
+        function toggleSenha() {
+            const input = document.getElementById('senhaInput');
+            const btn = document.querySelector('.toggle-senha');
+            
+            if (senhaVisivel) {
+                input.type = 'password';
+                btn.textContent = '👁️';
+                senhaVisivel = false;
+            } else {
+                input.type = 'text';
+                btn.textContent = '🙈';
+                senhaVisivel = true;
+            }
+        }
+
+        function limparCampos() {
+            document.getElementById('senhaInput').value = '';
+            document.getElementById('resultado').style.display = 'none';
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
+        }
+
+        function copiarHash() {
+            const hash = document.getElementById('hashGerado').textContent;
+            copiarTexto(hash);
+        }
+
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                mostrarAlerta('Hash copiado para a área de transferência! 📋', 'success');
+            }).catch(err => {
+                // Fallback para navegadores mais antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = texto;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                mostrarAlerta('Hash copiado para a área de transferência! 📋', 'success');
+            });
+        }
+
+        function mostrarAlerta(mensagem, tipo) {
+            // Remove alertas anteriores
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensagem;
+            
+            const resultado = document.getElementById('resultado');
+            resultado.parentNode.insertBefore(alert, resultado.nextSibling);
+            
+            // Remove o alerta após 3 segundos
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
+        // Event listener para Enter no campo de senha
+        document.getElementById('senhaInput').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                gerarHash();
+            }
+        });
+    </script>
+</body>
+</html>

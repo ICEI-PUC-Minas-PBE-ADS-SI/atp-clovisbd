@@ -1,0 +1,508 @@
+              <!DOCTYPE html>
+              <html lang="pt-BR">
+
+              <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                <title>Painel ICM - Acesso aos Lotes (Seguro)</title>
+                <style>
+                  body {
+                    margin: 0;
+                    font-family: Arial, sans-serif;
+                    background-color: white;
+                    font-size: 17px;
+                    color: #333;
+                  }
+
+                  body.sem-scroll {
+                    overflow: hidden;
+                  }
+
+                  .cabecalho {
+                    width: 100%;
+                    height: 200px;
+                    background: linear-gradient(to right, #0f1c3f, #2c3e50);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    color: white;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                    border-radius: 0 0 15px 15px;
+                    position: relative;
+                    padding-bottom: 30px;
+                  }
+
+                  .cabecalho .aest {
+                    position: absolute;
+                    top: 10px;
+                    left: 20px;
+                    font-size: 16px;
+                    font-weight: bold;
+                  }
+
+                  .cabecalho img.logo {
+                    position: absolute;
+                    top: 20px;
+                    right: 30px;
+                    height: 80px;
+                  }
+
+                  .cabecalho h1 {
+                    margin: 0;
+                    font-size: 28px;
+                  }
+
+                  .linha-proporcional {
+                    display: flex;
+                    width: 700px;
+                    height: 6px;
+                    margin-top: 10px;
+                    border-radius: 5px;
+                    overflow: hidden;
+                  }
+
+                  .linha-amarela {
+                    background-color: #ffc107;
+                    width: 50%;
+                  }
+
+                  .linha-branca {
+                    background-color: #fff;
+                    width: 50%;
+                  }
+
+                  .container {
+                    max-width: 1000px;
+                    margin: 40px auto;
+                    padding: 0 20px;
+                  }
+
+                  #conteudo {
+                    display: flex;
+                    gap: 30px;
+                  }
+
+                  .formulario,
+                  .mapa {
+                    flex: 1;
+                  }
+
+                  .formulario {
+                    text-align: center;
+                  }
+
+                  .formulario h2 {
+                    margin-bottom: 15px;
+                    font-size: 22px;
+                  }
+                  /* Para telas até 768px de largura (tablets e celulares maiores) */
+                  @media (max-width: 768px) {
+                    .cabecalho {
+                      height: auto;
+                      padding: 20px 10px 30px;
+                    }
+                    .cabecalho h1 {
+                      font-size: 22px;
+                    }
+                    .cabecalho img.logo {
+                      height: 60px;
+                      top: 10px;
+                      right: 15px;
+                    }
+                    .linha-proporcional {
+                      width: 90%;
+                    }
+
+                    .container {
+                      margin: 20px auto;
+                      padding: 0 10px;
+                    }
+
+                    #conteudo {
+                      flex-direction: column;
+                      gap: 20px;
+                    }
+
+                    .formulario,
+                    .mapa {
+                      width: 100%;
+                    }
+
+                    .formulario h2 {
+                      font-size: 20px;
+                    }
+
+                    .formulario input#senha,
+                    .formulario button {
+                      font-size: 16px;
+                    }
+                  }
+                  /* Mobile-only styles: apply on screens up to 480px wide */
+                  @media (max-width: 480px) {
+                    .cabecalho {
+                      width: 100%;
+                      height: auto;
+                      padding: 20px 10px 30px;
+                      background: linear-gradient(to right, #0f1c3f, #2c3e50);
+                      display: flex;
+                      flex-direction: column;
+                      justify-content: center;
+                      align-items: center;
+                      color: white;
+                      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                      border-radius: 0 0 15px 15px;
+                      position: relative;
+                    }
+
+                    .cabecalho .aest {
+                      position: absolute;
+                      top: 8px;
+                      left: 15px;
+                      font-size: 14px;
+                      font-weight: bold;
+                    }
+
+                    .cabecalho img.logo {
+                      position: absolute;
+                      top: 15px;
+                      right: 15px;
+                      height: 40px;
+                    }
+
+                    .cabecalho h1 {
+                      margin: 10px 0 0;
+                      font-size: 24px;
+                      text-align: center;
+                    }
+
+                    .linha-proporcional {
+                      display: flex;
+                      width: 90%;
+                      height: 6px;
+                      margin-top: 15px;
+                      border-radius: 5px;
+                      overflow: hidden;
+                    }
+
+                    .linha-amarela {
+                      background-color: #ffc107;
+                      width: 50%;
+                    }
+
+                    .linha-branca {
+                      background-color: #fff;
+                      width: 50%;
+                    }
+
+                    .container {
+                      max-width: 100%;
+                      margin: 20px auto;
+                      padding: 0 15px;
+                    }
+
+                    #conteudo {
+                      display: flex;
+                      flex-direction: column;
+                      gap: 20px;
+                    }
+
+                    .formulario,
+                    .mapa {
+                      width: 100%;
+                    }
+
+                    .formulario {
+                      text-align: center;
+                    }
+
+                    .formulario h2 {
+                      margin-bottom: 12px;
+                      font-size: 20px;
+                    }
+                  }
+
+
+                  .lotes {
+                    text-align: left;
+                    display: inline-block;
+                    margin-bottom: 20px;
+                  }
+
+                  .lotes label {
+                    display: block;
+                    font-size: 16px;
+                    margin-bottom: 8px;
+                    cursor: pointer;
+                  }
+
+                  .lotes input {
+                    margin-right: 8px;
+                    transform: scale(1.2);
+                    vertical-align: middle;
+                  }
+
+                  .formulario label[for="senha"] {
+                    display: block;
+                    font-size: 14px;
+                    margin-bottom: 5px;
+                    text-align: left;
+                  }
+
+                  .formulario input#senha {
+                    width: calc(100% - 10px);
+                    padding: 5px;
+                    font-size: 14px;
+                    margin-bottom: 10px;
+                    box-sizing: border-box;
+                  }
+
+                  .formulario button {
+                    padding: 5px 10px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    background-color: #0f1c3f;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                  }
+
+                  .formulario button:hover {
+                    background-color: #2c3e50;
+                  }
+
+                  #mensagem {
+                    color: red;
+                    margin-top: 10px;
+                    min-height: 1.2em;
+                  }
+
+                  .mapa {
+                    position: relative;
+                  }
+
+                  .mapa img#mapaImagem {
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                    border-radius: 8px;
+                  }
+
+                  #iframeConteudo {
+                    display: none;
+                  }
+
+                  .loading {
+                    opacity: 0.6;
+                    pointer-events: none;
+                  }
+
+                  /* Mensagem de sucesso */
+                  #mensagemSucesso {
+                    display: none;
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background-color: #4caf50;
+                    color: white;
+                    padding: 15px 20px;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+                    z-index: 10000;
+                    transition: opacity 0.6s ease-in-out;
+                    opacity: 0;
+                  }
+
+                  #mensagemSucesso.mostrar {
+                    display: block;
+                    opacity: 1;
+                  }
+                </style>
+              </head>
+
+              <body>
+                <script>
+                  var htmli = `
+              <header class="cabecalho">
+                <div class="aest">Assessoria de Gestão Estratégica</div>
+                <img src="https://www.der.mg.gov.br/images/header/Logo-DER-2024.png" alt="Logo DER-MG" class="logo">
+                <h1>Painel ICM - Acesso aos Lotes</h1>
+                <div class="linha-proporcional">
+                  <div class="linha-amarela"></div>
+                  <div class="linha-branca"></div>
+                </div>
+              </header>
+              <div class="container">
+                <div id="conteudo">
+                  <div class="formulario">
+                    <h2>Selecione o Lote</h2>
+                    <div class="lotes">
+                      <label>
+                        <input type="radio" name="loteRadio" value="lote1" onchange="selecionarLote('lote1')">
+                        Lote 1 (16ª URG – Oliveira) – GEOSISTEMAS ENGENHARIA E PLANEJAMENTO LTDA
+                      </label>
+                      <label>
+                        <input type="radio" name="loteRadio" value="lote2" onchange="selecionarLote('lote2')">
+                        Lote 2 (14ª URG – Patos de Minas) – CONSÓRCIO PBB ESTRADAS DE MINAS
+                      </label>
+                      <label>
+                        <input type="radio" name="loteRadio" value="lote3" onchange="selecionarLote('lote3')">
+                        Lote 3 (06ª URG – Montes Claros) – STRATA ENGENHARIA LTDA
+                      </label>
+                      <label>
+                        <input type="radio" name="loteRadio" value="lote4" onchange="selecionarLote('lote4')">
+                        Lote 4 (23ª URG – Governador Valadares) – RTA ENGENHEIROS CONSULTORES LTDA
+                      </label>
+                      <label>
+                        <input type="radio" name="loteRadio" value="lote5" onchange="selecionarLote('lote5')">
+                        Lote 5 (01ª URG – Belo Horizonte) – SYSTRA ENGENHARIA E CONSULTORIA LTDA
+                      </label>
+                    </div>
+                    <input type="hidden" id="lote">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" maxlength="50">
+                    <button onclick="verificarSenha()" id="btnEntrar">Entrar</button>
+                    <div id="mensagem">Selecione um lote acima antes de inserir a senha.</div>
+                  </div>
+                  <div class="mapa">
+                    <img id="mapaImagem" src="Mapa_geral.jpg" alt="Mapa Geral dos Lotes">
+                    <iframe id="iframeConteudo"></iframe>
+                  </div>
+                </div>
+              </div>
+              <div id="mensagemSucesso">
+                ✅ Acesso autorizado! Bem-vindo ao <span id="nomeLote"></span>.
+              </div>
+              `;
+
+                  document.body.innerHTML = htmli;
+
+                  async function criarHash(texto) {
+                    const encoder = new TextEncoder();
+                    const data = encoder.encode(texto);
+                    const buffer = await crypto.subtle.digest("SHA-256", data);
+                    return Array.from(new Uint8Array(buffer))
+                      .map(b => b.toString(16).padStart(2, "0"))
+                      .join("");
+                  }
+
+                  const dadosLotes = {
+                    lote1: {
+                      senhaHash: "4b75979ae4a9893d21ff3341d3aed3976e853c59d40cfbd6f5ac10420372de96",
+                      links: ["Lote01,https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=d42258e286184f749755a1196976f3fd"],
+                      mapa: "Map1att.jpg"
+                    },
+                    lote2: {
+                      senhaHash: "7019e74aa051bf061cbf4550ec08ad4b93645c1c9d122b970dabea5b4e997ad4",
+                      links: ["Lote02,https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=cb2ffda64af34c4b8d058bb565ff1d53"],
+                      mapa: "Map2.jpg"
+                    },
+                    lote3: {
+                      senhaHash: "2aaef9f41d772bd3d6150dac7a1db0e290db3654d8f54db512ec28e8e0e69fb7",
+                      links: ["Lote03,https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=54cfc84a48244356bb2a61d463ea3892"],
+                      mapa: "Map3.jpg"
+                    },
+                    lote4: {
+                      senhaHash: "df1f9b5bb51e1b0928748138e7012e763a48e452b9c815f35b34cf4bea97bca0",
+                      links: ["Lote04,https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=9520c9d8e26f47bcbb0fb9302c4c98a3"],
+                      mapa: "Map4.jpg"
+                    },
+                    lote5: {
+                      senhaHash: "08de66e2e7e4f3e49d6b52433142764f9e78d53f9c2e4666dd8bd3305e9d7fdd",
+                      links: ["lote05,https://observatorio.infraestrutura.mg.gov.br/portal/apps/experiencebuilder/experience/?id=b5debaee6b644fb0b8fff3a41ca3759c"],
+                      mapa: "Map5.jpg"
+                    }
+                  };
+
+                  function selecionarLote(loteId) {
+                    resetarFormulario(false);
+                    document.querySelector(`input[name="loteRadio"][value="${loteId}"]`).checked = true;
+                    document.getElementById("lote").value = loteId;
+                    document.getElementById("mapaImagem").src = dadosLotes[loteId].mapa;
+                    document.getElementById("mensagem").textContent =
+                      "Digite a senha para acessar este lote.";
+                  }
+
+                  async function verificarSenha() {
+                    const sel = document.getElementById("lote").value;
+                    const pwd = document.getElementById("senha").value.trim();
+                    const msg = document.getElementById("mensagem");
+                    const btn = document.getElementById("btnEntrar");
+                    const iframe = document.getElementById("iframeConteudo");
+
+                    btn.classList.add("loading");
+                    btn.textContent = "Verificando...";
+                    msg.textContent = "";
+
+                    if (!sel) {
+                      msg.textContent = "Selecione um lote primeiro.";
+                    } else if (!pwd) {
+                      msg.textContent = "Digite uma senha.";
+                    } else {
+                      try {
+                        const hash = await criarHash(pwd);
+                        await new Promise(r => setTimeout(r, 800));
+
+                        if (hash === dadosLotes[sel].senhaHash) {
+                          // Feedback visual: mensagem de sucesso
+                          const nomeLoteTexto = document.querySelector(`input[name="loteRadio"]:checked`)
+                            .parentElement.textContent.trim();
+                          document.getElementById("nomeLote").textContent = nomeLoteTexto;
+                          const msgS = document.getElementById("mensagemSucesso");
+                          msgS.classList.add("mostrar");
+                          setTimeout(() => msgS.classList.remove("mostrar"), 4000);
+
+                          // Atualiza cabeçalho com nome do lote
+                          document.querySelector(".cabecalho h1").textContent =
+                            `Painel ICM – ${nomeLoteTexto}`;
+
+                          // Abre o link no iframe em fullscreen
+                          const urlDestino = dadosLotes[sel].links[0].split(",")[1];
+                          iframe.src = urlDestino;
+                          Object.assign(iframe.style, {
+                            display: "block",
+                            position: "fixed",
+                            top: "0",
+                            left: "0",
+                            width: "100vw",
+                            height: "100vh",
+                            border: "none",
+                            background: "white",
+                            zIndex: "9999"
+                          });
+                          document.body.classList.add("sem-scroll");
+                        } else {
+                          msg.textContent = "Senha incorreta.";
+                        }
+                      } catch {
+                        msg.textContent = "Erro interno. Tente novamente.";
+                      }
+                    }
+
+                    btn.classList.remove("loading");
+                    btn.textContent = "Entrar";
+                    document.getElementById("senha").value = "";
+                  }
+
+                  function resetarFormulario(voltarImagem = true) {
+                    document.getElementById("senha").value = "";
+                    document.getElementById("mensagem").textContent = "";
+                    document.getElementById("lote").value = "";
+                    document.querySelectorAll('input[name="loteRadio"]').forEach(r => r.checked = false);
+
+                    if (voltarImagem) {
+                      const iframe = document.getElementById("iframeConteudo");
+                      iframe.style.display = "none";
+                      iframe.src = "";
+                      document.querySelector(".cabecalho h1").textContent = "Painel ICM - Acesso aos Lotes";
+                      document.body.classList.remove("sem-scroll");
+                    }
+                  }
+
+                  document.getElementById("senha")
+                    .addEventListener("keyup", e => { if (e.key === "Enter") verificarSenha(); });
+                </script>
+              </body>
+
+              </html>
