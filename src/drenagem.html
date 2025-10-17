@@ -4,7 +4,7 @@
               <head>
                 <meta charset="UTF-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <title>Painel ICM - Acesso aos Lotes (Seguro)</title>
+                <title>Painel DRENAGEM - Acesso aos Lotes (Seguro)</title>
                 <style>
                   body {
                     margin: 0;
@@ -327,7 +327,7 @@
               <header class="cabecalho">
                 <div class="aest">Assessoria de Gestão Estratégica</div>
                 <img src="https://www.der.mg.gov.br/images/header/Logo-DER-2024.png" alt="Logo DER-MG" class="logo">
-                <h1>Painel ICM - Acesso aos Lotes</h1>
+                <h1>Painel DRENAGEM - Acesso aos Lotes</h1>
                 <div class="linha-proporcional">
                   <div class="linha-amarela"></div>
                   <div class="linha-branca"></div>
@@ -455,7 +455,7 @@
 
                           // Atualiza cabeçalho com nome do lote
                           document.querySelector(".cabecalho h1").textContent =
-                            `Painel ICM – ${nomeLoteTexto}`;
+                            `Painel DRENAGEM – ${nomeLoteTexto}`;
 
                           // Abre o link no iframe em fullscreen
                           const urlDestino = dadosLotes[sel].links[0].split(",")[1];
@@ -495,7 +495,7 @@
                       const iframe = document.getElementById("iframeConteudo");
                       iframe.style.display = "none";
                       iframe.src = "";
-                      document.querySelector(".cabecalho h1").textContent = "Painel ICM - Acesso aos Lotes";
+                      document.querySelector(".cabecalho h1").textContent = "Painel DRENAGEM - Acesso aos Lotes";
                       document.body.classList.remove("sem-scroll");
                     }
                   }
