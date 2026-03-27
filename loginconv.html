@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Login</title>
+    <link rel="stylesheet" href="styleloginconv.css">
+    <style>
+        /* CSS adicional para garantir que o iframe funcione */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Evita barras de rolagem duplas */
+        }
+
+        #frame {
+            display: none; /* Começa oculto */
+            width: 100vw;
+            height: 100vh;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+    <header id="main-header">
+        <img src="https://www.der.mg.gov.br/images/1-diretorias/Comunicacao/logomarca-der-edificacoes-cor-reduzida.png" alt="Logo" class="logo">
+        <div class="equipe-nome">Assessoria de Gestão Estratégica</div>
+    </header>
+
+    <div class="container" id="login-card">
+        <h2>Login</h2>
+        <input id="usuario" placeholder="Usuário">
+        <input id="senha" type="password" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
+        <p id="erro"></p>
+    </div>
+
+    <iframe id="frame"></iframe>
+
+    <script>
+        const API_URL = "https://sheetdb.io/api/v1/2dh1xnnnte2ts";
+
+        async function login() {
+            const btn = document.querySelector("button");
+            const erroMsg = document.getElementById("erro");
+            
+            // Feedback visual de carregamento
+            btn.innerText = "Carregando...";
+            btn.disabled = true;
+
+            try {
+                const usuario = document.getElementById("usuario").value;
+                const senha = document.getElementById("senha").value;
+
+                const resposta = await fetch(API_URL);
+                const usuarios = await resposta.json();
+
+                const user = usuarios.find(u =>
+                    u.usuario === usuario && u.senha === senha
+                );
+
+                if (user) {
+                    // 1. Esconde o card de login e o header
+                    document.getElementById("login-card").style.display = "none";
+                    document.getElementById("main-header").style.display = "none";
+
+                    // 2. Configura e mostra o iframe
+                    const frame = document.getElementById("frame");
+                    frame.src = user.link;
+                    frame.style.display = "block";
+                } else {
+                    erroMsg.innerText = "Login inválido";
+                    btn.innerText = "Entrar";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Erro na API:", error);
+                erroMsg.innerText = "Erro ao conectar com o servidor.";
+                btn.innerText = "Entrar";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

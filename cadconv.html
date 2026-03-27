@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Cadastrar usuário</title>
+<link rel="stylesheet" href="stylecadconv.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Cadastrar usuário</h2>
+
+<input id="usuario" placeholder="Usuário">
+<input id="senha" placeholder="Senha">
+<input id="link" placeholder="Link do sistema">
+
+<button onclick="cadastrar()">Cadastrar</button>
+
+<p id="msg"></p>
+
+</div>
+
+<script>
+
+const API_URL = "https://sheetdb.io/api/v1/2dh1xnnnte2ts"
+
+function cadastrar(){
+
+const usuario = document.getElementById("usuario").value
+const senha = document.getElementById("senha").value
+const link = document.getElementById("link").value
+
+fetch(API_URL,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+data:{
+usuario:usuario,
+senha:senha,
+link:link
+}
+})
+})
+
+.then(res=>res.json())
+.then(data=>{
+
+document.getElementById("msg").innerText="Usuário cadastrado"
+
+})
+
+}
+
+</script>
+
+</body>
+</html>
