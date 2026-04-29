@@ -3,7 +3,7 @@
 // =====================================================
 // URL CONFIRMADA:
 // https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0
-
+// OTIMIZAÇÃO: carrega automaticamente APENAS dados do ÚLTIMO MÊS
 let ocorrencias = [];
 let indiceAtual = 0;
 
@@ -13,16 +13,32 @@ require([
   "esri/layers/FeatureLayer"
 ], function (Map, MapView, FeatureLayer) {
 
-
   const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0";
+
 
   function marker(color) {
     return { type: "simple-marker", color, size: 8 };
   }
 
+  // Calcula automaticamente o último mês/ano
+  function getUltimoMesAno() {
+    const hoje = new Date();
+    hoje.setMonth(hoje.getMonth() - 1);
+    return {
+      ano: hoje.getFullYear(),
+      mes: hoje.getMonth() + 1 // JS começa em 0
+    };
+  }
+
+
+  const { ano: anoPadrao, mes: mesPadrao } = getUltimoMesAno();
+
+
   const layer = new FeatureLayer({
     url: restUrl,
     outFields: ["*"],
+    // FILTRO PADRÃO PARA PERFORMANCE (ÚLTIMO MÊS)
+    definitionExpression: `ano_avalia = ${anoPadrao} AND mes_avalia = ${mesPadrao}`,
     featureReduction: {
       type: "cluster",
       clusterRadius: "100px",
@@ -62,12 +78,12 @@ require([
     zoom: 7
   });
 
+  // Popular filtros (limitado ao último mês para performance)
   async function popularFiltros() {
     const q = layer.createQuery();
-    q.where = "1=1";
+    q.where = `ano_avalia = ${anoPadrao} AND mes_avalia = ${mesPadrao}`;
     q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo"];
     q.returnDistinctValues = true;
-
 
     const res = await layer.queryFeatures(q);
 
@@ -84,7 +100,12 @@ require([
     preencher("mes", meses);
     preencher("rodovia", rods);
     preencher("tipo", tipos);
+
+    // Seleciona automaticamente o mês/ano padrão
+    document.getElementById("ano").value = anoPadrao;
+    document.getElementById("mes").value = mesPadrao;
   }
+
 
   function preencher(id, valores) {
     const sel = document.getElementById(id);
@@ -97,11 +118,11 @@ require([
     });
   }
 
+  // Aplicar filtros manualmente (quando usuário mudar)
   btnFiltrar.onclick = async () => {
     const where = `ano_avalia = ${ano.value} AND mes_avalia = ${mes.value} AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
 
     layer.definitionExpression = where;
-
 
     const q = layer.createQuery();
     q.where = where;
