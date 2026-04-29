@@ -1,9 +1,11 @@
 // =====================================================
-// script.js – CONSUMO VIA REST NATIVO DO ARCGIS SERVER
+// script.js – REST ArcGIS Server (SEM AGREGAÇÃO)
 // =====================================================
-// URL CONFIRMADA:
-// https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0
-// OTIMIZAÇÃO: carrega automaticamente APENAS dados do ÚLTIMO MÊS
+// Estratégia:
+// - Cada ocorrência é exibida como UM ponto individual
+// - Mantém filtro automático (mês atual + mês anterior)
+// - Melhora performance removendo clusterização
+// - Fototeca inicializa automaticamente
 let ocorrencias = [];
 let indiceAtual = 0;
 
@@ -15,38 +17,42 @@ require([
 
   const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0";
 
-
   function marker(color) {
     return { type: "simple-marker", color, size: 8 };
   }
 
-  // Calcula automaticamente o último mês/ano
-  function getUltimoMesAno() {
+  // -----------------------------------------------------
+  // Calcula mês atual + mês anterior (robusto para virada de ano)
+  // -----------------------------------------------------
+  function getMesesPadrao() {
     const hoje = new Date();
-    hoje.setMonth(hoje.getMonth() - 1);
-    return {
-      ano: hoje.getFullYear(),
-      mes: hoje.getMonth() + 1 // JS começa em 0
-    };
+    const atual = { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
+
+    const anteriorDate = new Date(hoje);
+    anteriorDate.setMonth(anteriorDate.getMonth() - 1);
+    const anterior = { ano: anteriorDate.getFullYear(), mes: anteriorDate.getMonth() + 1 };
+
+    return { atual, anterior };
   }
 
+  const { atual, anterior } = getMesesPadrao();
 
-  const { ano: anoPadrao, mes: mesPadrao } = getUltimoMesAno();
+
+  // WHERE inicial: mês atual OU último mês
+  const whereInicial = `(
+    (ano_avalia = ${atual.ano} AND mes_avalia = ${atual.mes})
+    OR
+    (ano_avalia = ${anterior.ano} AND mes_avalia = ${anterior.mes})
+  )`;
 
 
+  // -----------------------------------------------------
+  // FeatureLayer SEM clusterização (1 ponto = 1 ocorrência)
+  // -----------------------------------------------------
   const layer = new FeatureLayer({
     url: restUrl,
     outFields: ["*"],
-    // FILTRO PADRÃO PARA PERFORMANCE (ÚLTIMO MÊS)
-    definitionExpression: `ano_avalia = ${anoPadrao} AND mes_avalia = ${mesPadrao}`,
-    featureReduction: {
-      type: "cluster",
-      clusterRadius: "100px",
-      labelingInfo: [{
-        labelExpressionInfo: { expression: "$feature.cluster_count" },
-        symbol: { type: "text", color: "white", font: { size: 12, weight: "bold" } }
-      }]
-    },
+    definitionExpression: whereInicial,
     renderer: {
       type: "unique-value",
       field: "tipo",
@@ -66,10 +72,8 @@ require([
     }
   });
 
-  const map = new Map({
-    basemap: "streets",
-    layers: [layer]
-  });
+  const map = new Map({ basemap: "streets", layers: [layer] });
+
 
   const view = new MapView({
     container: "map",
@@ -78,18 +82,29 @@ require([
     zoom: 7
   });
 
-  // Popular filtros (limitado ao último mês para performance)
-  async function popularFiltros() {
+  // -----------------------------------------------------
+  // Popular filtros E fototeca (sem agregação)
+  // -----------------------------------------------------
+  async function popularFiltrosEFototeca() {
     const q = layer.createQuery();
-    q.where = `ano_avalia = ${anoPadrao} AND mes_avalia = ${mesPadrao}`;
-    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo"];
-    q.returnDistinctValues = true;
+    q.where = whereInicial;
+    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "KM", "Imagem"];
+    q.orderByFields = ["KM ASC"];
+
 
     const res = await layer.queryFeatures(q);
+    ocorrencias = res.features;
+    indiceAtual = 0;
+
+
+    if (!ocorrencias.length) {
+      info.innerText = "Nenhuma ocorrência encontrada para o período atual.";
+      return;
+    }
 
 
     const anos = new Set(), meses = new Set(), rods = new Set(), tipos = new Set();
-    res.features.forEach(f => {
+    ocorrencias.forEach(f => {
       anos.add(f.attributes.ano_avalia);
       meses.add(f.attributes.mes_avalia);
       rods.add(f.attributes.ROD);
@@ -101,11 +116,13 @@ require([
     preencher("rodovia", rods);
     preencher("tipo", tipos);
 
-    // Seleciona automaticamente o mês/ano padrão
-    document.getElementById("ano").value = anoPadrao;
-    document.getElementById("mes").value = mesPadrao;
-  }
+    document.getElementById("ano").value = atual.ano;
+    document.getElementById("mes").value = atual.mes;
 
+
+    mostrar();
+    view.goTo(ocorrencias);
+  }
 
   function preencher(id, valores) {
     const sel = document.getElementById(id);
@@ -118,7 +135,9 @@ require([
     });
   }
 
-  // Aplicar filtros manualmente (quando usuário mudar)
+  // -----------------------------------------------------
+  // Aplicar filtros manuais
+  // -----------------------------------------------------
   btnFiltrar.onclick = async () => {
     const where = `ano_avalia = ${ano.value} AND mes_avalia = ${mes.value} AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
 
@@ -134,12 +153,15 @@ require([
 
     if (ocorrencias.length) {
       mostrar();
-      view.goTo(res.features);
+      view.goTo(ocorrencias);
     } else {
       info.innerText = "Nenhuma ocorrência encontrada.";
     }
   };
 
+  // -----------------------------------------------------
+  // Fototeca
+  // -----------------------------------------------------
   function mostrar() {
     const f = ocorrencias[indiceAtual].attributes;
     foto.src = f.Imagem;
@@ -156,5 +178,5 @@ require([
     mostrar();
   };
 
-  view.when(popularFiltros);
+  view.when(popularFiltrosEFototeca);
 });
