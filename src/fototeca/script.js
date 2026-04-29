@@ -59,12 +59,12 @@ require([
       type: "unique-value",
       field: "tipo",
       uniqueValueInfos: [
-        { value: "Trinca", symbol: marker("orange") },
-        { value: "Remendo", symbol: marker("blue") },
-        { value: "Buraco", symbol: marker("red") },
-        { value: "Placa", symbol: marker("green") },
-        { value: "Drenagem", symbol: marker("purple") },
-        { value: "Roçada", symbol: marker("brown") }
+        { value: "Trinca", symbol: marker("gray") },
+        { value: "Remendo", symbol: marker("black") },
+        { value: "Buraco", symbol: marker("orange") },
+        { value: "Placa", symbol: marker("yellow") },
+        { value: "Drenagem", symbol: marker("blue") },
+        { value: "Roçada", symbol: marker("green") }
       ],
       defaultSymbol: marker("gray")
     },
