@@ -1,6 +1,5 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-
 body {
   font-family: Arial, sans-serif;
   display: flex;
@@ -29,11 +28,9 @@ main {
   grid-template-columns: 1fr 1fr;
 }
 
-
 #map {
   height: 100%;
 }
-
 
 .carousel {
   display: flex;
@@ -45,7 +42,6 @@ main {
   position: relative;
   width: 90%;
 }
-
 
 .foto-container img {
   width: 100%;
@@ -70,5 +66,5 @@ main {
 
 @media (max-width: 900px) {
   main { grid-template-columns: 1fr; }
- #map { height: 300px; }
+  #map { height: 300px; }
 }
