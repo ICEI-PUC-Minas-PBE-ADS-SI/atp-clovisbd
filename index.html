@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa e Fototeca de Ocorrências</title>
+
+  <!-- ArcGIS JS API -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <h1>Mapa e Fototeca de Ocorrências em Rodovias</h1>
+</header>
+
+<section class="filtros">
+  <select id="ano"></select>
+  <select id="mes"></select>
+  <select id="rodovia"></select>
+  <select id="tipo"></select>
+ <button id="btnFiltrar">Filtrar</button>
+</section>
+
+<main>
+  <div id="map"></div>
+
+
+ <div class="carousel">
+ <button class="nav" id="prev">◀</button>
+ <div class="foto-container">
+ <img id="foto" src="" alt="Ocorrência" />
+ <div class="info" id="info"></div>
+    </div>
+    <button class="nav" id="next">▶</button>
+  </div>
+</main>
+
+
+<footer>
+  <p>Dados públicos – ArcGIS Server</p>
+</footer>
+
+
+<script src="script.js"></script>
+</body>
