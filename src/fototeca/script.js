@@ -1,11 +1,13 @@
 // =====================================================
-// script.js – REST ArcGIS Server (SEM AGREGAÇÃO)
+// script.js – REST ArcGIS Server (SEM AGREGAÇÃO | CAMPOS TEXTO)
 // =====================================================
-// Estratégia:
-// - Cada ocorrência é exibida como UM ponto individual
-// - Mantém filtro automático (mês atual + mês anterior)
-// - Melhora performance removendo clusterização
-// - Fototeca inicializa automaticamente
+// REGRAS IMPORTANTES:
+// - ano_avalia e mes_avalia são CAMPOS TEXTO
+// - mes_avalia usa valores '01' .. '12'
+// - NÃO usar OR no servidor (evita erro "Unable to complete operation")
+// - Estratégia: tentar MÊS ATUAL, se não houver dados → fallback para MÊS ANTERIOR
+
+
 let ocorrencias = [];
 let indiceAtual = 0;
 
@@ -22,37 +24,37 @@ require([
   }
 
   // -----------------------------------------------------
-  // Calcula mês atual + mês anterior (robusto para virada de ano)
+  // Calcula mês atual e anterior como STRING ('01'..'12')
   // -----------------------------------------------------
-  function getMesesPadrao() {
+  function getMesAnoTexto() {
     const hoje = new Date();
-    const atual = { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
+
+    const atualMesNum = hoje.getMonth() + 1;
+    const atual = {
+      ano: String(hoje.getFullYear()),
+      mes: String(atualMesNum).padStart(2, '0')
+    };
+
 
     const anteriorDate = new Date(hoje);
     anteriorDate.setMonth(anteriorDate.getMonth() - 1);
-    const anterior = { ano: anteriorDate.getFullYear(), mes: anteriorDate.getMonth() + 1 };
+    const anteriorMesNum = anteriorDate.getMonth() + 1;
+    const anterior = {
+      ano: String(anteriorDate.getFullYear()),
+      mes: String(anteriorMesNum).padStart(2, '0')
+    };
+
 
     return { atual, anterior };
   }
 
-  const { atual, anterior } = getMesesPadrao();
-
-
-  // WHERE inicial: mês atual OU último mês
-  const whereInicial = `(
-    (ano_avalia = ${atual.ano} AND mes_avalia = ${atual.mes})
-    OR
-    (ano_avalia = ${anterior.ano} AND mes_avalia = ${anterior.mes})
-  )`;
-
-
+  const { atual, anterior } = getMesAnoTexto();
   // -----------------------------------------------------
-  // FeatureLayer SEM clusterização (1 ponto = 1 ocorrência)
+  // FeatureLayer (sem clusterização)
   // -----------------------------------------------------
   const layer = new FeatureLayer({
     url: restUrl,
-    outFields: ["*"],
-    definitionExpression: whereInicial,
+    outFields: ["*"] ,
     renderer: {
       type: "unique-value",
       field: "tipo",
@@ -74,7 +76,6 @@ require([
 
   const map = new Map({ basemap: "streets", layers: [layer] });
 
-
   const view = new MapView({
     container: "map",
     map,
@@ -83,26 +84,26 @@ require([
   });
 
   // -----------------------------------------------------
-  // Popular filtros E fototeca (sem agregação)
+  // Função central: carrega dados com fallback automático
   // -----------------------------------------------------
-  async function popularFiltrosEFototeca() {
-    const q = layer.createQuery();
-    q.where = whereInicial;
-    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "KM", "Imagem"];
-    q.orderByFields = ["KM ASC"];
-
-
-    const res = await layer.queryFeatures(q);
+  async function carregarDadosComFallback() {
+    // 1) tenta mês atual
+    let where = `ano_avalia = '${atual.ano}' AND mes_avalia = '${atual.mes}'`;
+    let res = await executarConsulta(where);
+    // 2) fallback para mês anterior
+    if (!res.features.length) {
+      where = `ano_avalia = '${anterior.ano}' AND mes_avalia = '${anterior.mes}'`;
+      res = await executarConsulta(where);
+    }
     ocorrencias = res.features;
     indiceAtual = 0;
-
 
     if (!ocorrencias.length) {
       info.innerText = "Nenhuma ocorrência encontrada para o período atual.";
       return;
     }
 
-
+    // --------- Popular filtros ---------
     const anos = new Set(), meses = new Set(), rods = new Set(), tipos = new Set();
     ocorrencias.forEach(f => {
       anos.add(f.attributes.ano_avalia);
@@ -116,13 +117,21 @@ require([
     preencher("rodovia", rods);
     preencher("tipo", tipos);
 
-    document.getElementById("ano").value = atual.ano;
-    document.getElementById("mes").value = atual.mes;
-
-
+    document.getElementById("ano").value = ocorrencias[0].attributes.ano_avalia;
+    document.getElementById("mes").value = ocorrencias[0].attributes.mes_avalia;
     mostrar();
     view.goTo(ocorrencias);
   }
+
+  async function executarConsulta(where) {
+    layer.definitionExpression = where;
+    const q = layer.createQuery();
+    q.where = where;
+    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "KM", "Imagem"];
+    q.orderByFields = ["KM ASC"];
+    return layer.queryFeatures(q);
+  }
+
 
   function preencher(id, valores) {
     const sel = document.getElementById(id);
@@ -136,20 +145,13 @@ require([
   }
 
   // -----------------------------------------------------
-  // Aplicar filtros manuais
+  // Filtro manual (campos TEXTO)
   // -----------------------------------------------------
   btnFiltrar.onclick = async () => {
-    const where = `ano_avalia = ${ano.value} AND mes_avalia = ${mes.value} AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
-
-    layer.definitionExpression = where;
-
-    const q = layer.createQuery();
-    q.where = where;
-    q.orderByFields = ["KM ASC"];
-
-    const res = await layer.queryFeatures(q);
-    ocorrencias = res.features;
+    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
+    const res = await executarConsulta(where);    ocorrencias = res.features;
     indiceAtual = 0;
+
 
     if (ocorrencias.length) {
       mostrar();
@@ -158,6 +160,7 @@ require([
       info.innerText = "Nenhuma ocorrência encontrada.";
     }
   };
+
 
   // -----------------------------------------------------
   // Fototeca
@@ -178,5 +181,6 @@ require([
     mostrar();
   };
 
-  view.when(popularFiltrosEFototeca);
+  // Inicialização
+  view.when(carregarDadosComFallback);
 });
