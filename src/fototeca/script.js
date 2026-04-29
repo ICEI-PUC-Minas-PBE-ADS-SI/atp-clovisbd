@@ -1,124 +1,221 @@
 // =====================================================
 // script.js – REST ArcGIS Server (SEM AGREGAÇÃO | CAMPOS TEXTO)
 // =====================================================
-// Funcionalidades:
-// - Clique no ponto do mapa atualiza a fototeca
-// - Botão ▶ Auto percorre fotos a cada 2s (sincronizado com mapa)
-// - Destaque em vermelho do ponto ativo
-
+// ATUALIZAÇÕES:
+// 1) Cada ocorrência = 1 ponto (sem cluster)
+// 2) Cores ajustadas por tipo (conforme solicitado)
+// 3) Destaque em VERMELHO do ponto correspondente à foto atual
+// 4) Informações da ocorrência exibidas ABAIXO da imagem
+// 5) Filtro automático com fallback: mês atual -> mês anterior (campos TEXTO)
 let ocorrencias = [];
 let indiceAtual = 0;
 let destaqueGrafico = null;
-let timer = null;
-
 require([
-  "esri/Map",
-  "esri/views/MapView",
-  "esri/layers/FeatureLayer",
-  "esri/layers/GraphicsLayer",
-  "esri/Graphic"
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/layers/FeatureLayer",
+  "esri/layers/GraphicsLayer",
+  "esri/Graphic"
 ], function (Map, MapView, FeatureLayer, GraphicsLayer, Graphic) {
+  const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0";
 
-  const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0";
+  // -----------------------------------------------------
+  // Símbolos por tipo (cores corrigidas)
+  // -----------------------------------------------------
+  function marker(color) {
+    return { type: "simple-marker", color, size: 8, outline: { color: "white", width: 0.5 } };
+  }
 
-  function marker(color) {
-    return { type: "simple-marker", color, size: 8, outline: { color: "white", width: 0.5 } };
-  }
+  const renderer = {
+    type: "unique-value",
+    field: "tipo",
+    uniqueValueInfos: [
+      { value: "Trinca", symbol: marker("gray") },
+      { value: "Remendo", symbol: marker("black") },
+      { value: "Buraco", symbol: marker("orange") },
+      { value: "Placa", symbol: marker("yellow") },
+      { value: "Drenagem", symbol: marker("blue") },
+      { value: "Roçada", symbol: marker("green") }
+    ],
+    defaultSymbol: marker("gray")
+  };
 
-  const renderer = {
-    type: "unique-value",
-    field: "tipo",
-    uniqueValueInfos: [
-      { value: "Trinca", symbol: marker("gray") },
-      { value: "Remendo", symbol: marker("black") },
-      { value: "Buraco", symbol: marker("orange") },
-      { value: "Placa", symbol: marker("yellow") },
-      { value: "Drenagem", symbol: marker("blue") },
-      { value: "Roçada", symbol: marker("green") }
-    ],
-    defaultSymbol: marker("gray")
-  };
 
-  function getMesAnoTexto() {
-    const hoje = new Date();
-    const atual = { ano: String(hoje.getFullYear()), mes: String(hoje.getMonth() + 1).padStart(2, '0') };
-    const ant = new Date(hoje); ant.setMonth(ant.getMonth() - 1);
-    const anterior = { ano: String(ant.getFullYear()), mes: String(ant.getMonth() + 1).padStart(2, '0') };
-    return { atual, anterior };
-  }
+  // -----------------------------------------------------
+  // Datas (campos TEXTO: '01'..'12')
+  // -----------------------------------------------------
+  function getMesAnoTexto() {
+    const hoje = new Date();
 
-  const { atual, anterior } = getMesAnoTexto();
+    const atualMes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const atual = { ano: String(hoje.getFullYear()), mes: atualMes };
+    const anteriorDate = new Date(hoje);
+    anteriorDate.setMonth(anteriorDate.getMonth() - 1);
+    const anteriorMes = String(anteriorDate.getMonth() + 1).padStart(2, '0');
+    const anterior = { ano: String(anteriorDate.getFullYear()), mes: anteriorMes };
 
-  const layer = new FeatureLayer({ url: restUrl, outFields: ["*"], renderer, popupEnabled: false });
-  const destaqueLayer = new GraphicsLayer();
 
-  const map = new Map({ basemap: "streets", layers: [layer, destaqueLayer] });
-  const view = new MapView({ container: "map", map, center: [-44, -19], zoom: 7 });
+    return { atual, anterior };
+  }
 
-  async function executarConsulta(where) {
-    layer.definitionExpression = where;
-    const q = layer.createQuery();
-    q.where = where;
-    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "KM", "Imagem"];
-    q.orderByFields = ["KM ASC"];
-    return layer.queryFeatures(q);
-  }
+  const { atual, anterior } = getMesAnoTexto();
 
-  async function carregarDados() {
-    let res = await executarConsulta(`ano_avalia='${atual.ano}' AND mes_avalia='${atual.mes}'`);
-    if (!res.features.length) {
-      res = await executarConsulta(`ano_avalia='${anterior.ano}' AND mes_avalia='${anterior.mes}'`);
-    }
-    ocorrencias = res.features;
-    indiceAtual = 0;
-    if (!ocorrencias.length) return;
-    mostrar();
-    view.goTo(ocorrencias);
-  }
 
-  function destacarPonto(feature) {
-    destaqueLayer.removeAll();
-    destaqueLayer.add(new Graphic({ geometry: feature.geometry, symbol: { type: "simple-marker", color: "red", size: 14, outline: { color: "white", width: 1.5 } } }));
-  }
+  // -----------------------------------------------------
+  // Camadas
+  // -----------------------------------------------------
+  const layer = new FeatureLayer({
+    url: restUrl,
+    outFields: ["*"],
+    renderer: renderer,
+    popupEnabled: false
+  });
 
-  function mostrar() {
-    const f = ocorrencias[indiceAtual];
-    foto.src = f.attributes.Imagem;
-    info.innerHTML = `<strong>Rodovia:</strong> ${f.attributes.ROD}<br><strong>Km:</strong> ${f.attributes.KM}<br><strong>Tipo:</strong> ${f.attributes.tipo}<br><strong>Mês/Ano:</strong> ${f.attributes.mes_avalia}/${f.attributes.ano_avalia}`;
-    destacarPonto(f);
-    view.goTo({ target: f.geometry, zoom: Math.max(view.zoom, 15) });
-  }
+  const destaqueLayer = new GraphicsLayer();
+  const map = new Map({ basemap: "streets", layers: [layer, destaqueLayer] });
 
-  // Clique no ponto do mapa → abre foto correspondente
-  view.on("click", async (event) => {
-    const hit = await view.hitTest(event);
-    const r = hit.results.find(r => r.graphic && r.graphic.layer === layer);
-    if (r) {
-      const idx = ocorrencias.findIndex(o => o.attributes.KM === r.graphic.attributes.KM && o.attributes.Imagem === r.graphic.attributes.Imagem);
-      if (idx >= 0) {
-        indiceAtual = idx;
-        mostrar();
-      }
-    }
-  });
 
-  prev.onclick = () => { indiceAtual = (indiceAtual - 1 + ocorrencias.length) % ocorrencias.length; mostrar(); };
-  next.onclick = () => { indiceAtual = (indiceAtual + 1) % ocorrencias.length; mostrar(); };
+  const view = new MapView({
+    container: "map",
+    map,
+    center: [-44, -19],
+    zoom: 7
+  });
 
-  // Animação automática
-  btnPlay.onclick = () => {
-    if (timer) {
-      clearInterval(timer);
-      timer = null;
-      btnPlay.textContent = "▶ Auto";
-    } else {
-      btnPlay.textContent = "⏸";
-      timer = setInterval(() => {
-        indiceAtual = (indiceAtual + 1) % ocorrencias.length;
-        mostrar();
-      }, 2000);
-    }
-  };
+  // -----------------------------------------------------
+  // Consulta com fallback (sem OR no servidor)
+  // -----------------------------------------------------
+  async function executarConsulta(where) {
+    layer.definitionExpression = where;
+    const q = layer.createQuery();
+    q.where = where;
+    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "KM", "Imagem"];
+    q.orderByFields = ["KM ASC"];
+    return layer.queryFeatures(q);
+  }
 
-  view.when(carregarDados);
+
+  async function carregarDadosComFallback() {
+    let where = `ano_avalia = '${atual.ano}' AND mes_avalia = '${atual.mes}'`;
+    let res = await executarConsulta(where);
+
+
+    if (!res.features.length) {
+      where = `ano_avalia = '${anterior.ano}' AND mes_avalia = '${anterior.mes}'`;
+      res = await executarConsulta(where);
+    }
+
+
+    ocorrencias = res.features;
+    indiceAtual = 0;
+
+
+    if (!ocorrencias.length) {
+      info.innerText = "Nenhuma ocorrência encontrada para o período atual.";
+      return;
+    }
+
+
+    // Filtros
+    const anos = new Set(), meses = new Set(), rods = new Set(), tipos = new Set();
+    ocorrencias.forEach(f => {
+      anos.add(f.attributes.ano_avalia);
+      meses.add(f.attributes.mes_avalia);
+      rods.add(f.attributes.ROD);
+      tipos.add(f.attributes.tipo);
+    });
+
+    preencher("ano", anos);
+    preencher("mes", meses);
+    preencher("rodovia", rods);
+    preencher("tipo", tipos);
+
+    document.getElementById("ano").value = ocorrencias[0].attributes.ano_avalia;
+    document.getElementById("mes").value = ocorrencias[0].attributes.mes_avalia;
+
+
+    mostrar();
+    view.goTo(ocorrencias);
+  }
+
+  function preencher(id, valores) {
+    const sel = document.getElementById(id);
+    sel.innerHTML = "";
+    [...valores].sort().forEach(v => {
+      const opt = document.createElement("option");
+      opt.value = v;
+      opt.textContent = v;
+      sel.appendChild(opt);
+    });
+  }
+
+  // -----------------------------------------------------
+  // Destaque do ponto ativo (vermelho)
+  // -----------------------------------------------------
+  function destacarPonto(feature) {
+    destaqueLayer.removeAll();
+    destaqueGrafico = new Graphic({
+      geometry: feature.geometry,
+      symbol: {
+        type: "simple-marker",
+        color: "red",
+        size: 14,
+        outline: { color: "white", width: 1.5 }
+      }
+    });
+    destaqueLayer.add(destaqueGrafico);
+    view.goTo({ target: feature.geometry, zoom: Math.max(view.zoom, 15) });
+  }
+  // -----------------------------------------------------
+  // Fototeca (info ABAIXO da imagem)
+  // -----------------------------------------------------
+  function mostrar() {
+    const f = ocorrencias[indiceAtual];
+    const a = f.attributes;
+    foto.src = a.Imagem;
+
+
+    info.innerHTML = `
+      <div style="margin-top:8px">
+        <strong>Rodovia:</strong> ${a.ROD}<br>
+        <strong>Km:</strong> ${a.KM}<br>
+        <strong>Tipo:</strong> ${a.tipo}<br>
+        <strong>Mês/Ano:</strong> ${a.mes_avalia}/${a.ano_avalia}
+      </div>
+    `;
+
+
+    destacarPonto(f);
+  }
+
+
+  prev.onclick = () => {
+    indiceAtual = (indiceAtual - 1 + ocorrencias.length) % ocorrencias.length;
+    mostrar();
+  };
+
+
+  next.onclick = () => {
+    indiceAtual = (indiceAtual + 1) % ocorrencias.length;
+    mostrar();
+  };
+
+  // Filtro manual
+  btnFiltrar.onclick = async () => {
+    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
+    const res = await executarConsulta(where);
+    ocorrencias = res.features;
+    indiceAtual = 0;
+    if (ocorrencias.length) {
+      mostrar();
+      view.goTo(ocorrencias);
+    } else {
+      info.innerText = "Nenhuma ocorrência encontrada.";
+      destaqueLayer.removeAll();
+    }
+  };
+
+
+  // Inicialização
+  view.when(carregarDadosComFallback);
 });
