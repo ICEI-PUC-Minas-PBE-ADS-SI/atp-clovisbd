@@ -172,7 +172,7 @@ require([
   function mostrar() {
     const f = ocorrencias[indiceAtual];
     const a = f.attributes;
-    foto.src = a.Imagem;
+    foto.src = a.imagem;
 
 
     info.innerHTML = `
