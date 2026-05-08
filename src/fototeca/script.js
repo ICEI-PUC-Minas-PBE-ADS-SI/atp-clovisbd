@@ -89,7 +89,7 @@ require([
     layer.definitionExpression = where;
     const q = layer.createQuery();
     q.where = where;
-    q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "km", "Imagem"];
+    q.outFields = ["ano_avalia", "mes_avalia", "rod", "tipo", "km", "imagem"];
     q.orderByFields = ["km ASC"];
     return layer.queryFeatures(q);
   }
@@ -121,7 +121,7 @@ require([
     ocorrencias.forEach(f => {
       anos.add(f.attributes.ano_avalia);
       meses.add(f.attributes.mes_avalia);
-      rods.add(f.attributes.ROD);
+      rods.add(f.attributes.rod);
       tipos.add(f.attributes.tipo);
     });
 
@@ -177,7 +177,7 @@ require([
 
     info.innerHTML = `
       <div style="margin-top:8px">
-        <strong>Rodovia:</strong> ${a.ROD}<br>
+        <strong>Rodovia:</strong> ${a.rod}<br>
         <strong>Km:</strong> ${a.km}<br>
         <strong>Tipo:</strong> ${a.tipo}<br>
         <strong>Mês/Ano:</strong> ${a.mes_avalia}/${a.ano_avalia}
@@ -202,7 +202,7 @@ require([
 
   // Filtro manual
   btnFiltrar.onclick = async () => {
-    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND ROD = '${rodovia.value}' AND tipo = '${tipo.value}'`;
+    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND rod = '${rodovia.value}' AND tipo = '${tipo.value}'`;
     const res = await executarConsulta(where);
     ocorrencias = res.features;
     indiceAtual = 0;
