@@ -68,7 +68,7 @@ require([
     url: restUrl,
     outFields: ["*"],
     renderer: renderer,
-    popupEnabled: false
+    popupEnabled: true
   });
 
   const destaqueLayer = new GraphicsLayer();
@@ -203,7 +203,7 @@ require([
 
   // Filtro manual
   btnFiltrar.onclick = async () => {
-    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND rod = '${rod.value}' AND tipo = '${tipo.value}'`;
+    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND rod = '${rodovia.value}' AND tipo = '${tipo.value}'`;
     const res = await executarConsulta(where);
     ocorrencias = res.features;
     indiceAtual = 0;
