@@ -90,7 +90,7 @@ require([
     const q = layer.createQuery();
     q.where = where;
     q.outFields = ["ano_avalia", "mes_avalia", "ROD", "tipo", "km", "Imagem"];
-    q.orderByFields = ["KM ASC"];
+    q.orderByFields = ["km ASC"];
     return layer.queryFeatures(q);
   }
 
@@ -178,7 +178,7 @@ require([
     info.innerHTML = `
       <div style="margin-top:8px">
         <strong>Rodovia:</strong> ${a.ROD}<br>
-        <strong>Km:</strong> ${a.KM}<br>
+        <strong>Km:</strong> ${a.km}<br>
         <strong>Tipo:</strong> ${a.tipo}<br>
         <strong>Mês/Ano:</strong> ${a.mes_avalia}/${a.ano_avalia}
       </div>
