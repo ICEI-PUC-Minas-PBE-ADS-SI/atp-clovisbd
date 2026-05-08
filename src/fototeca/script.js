@@ -180,6 +180,7 @@ require([
         <strong>Rodovia:</strong> ${a.rod}<br>
         <strong>Km:</strong> ${a.km}<br>
         <strong>Tipo:</strong> ${a.tipo}<br>
+        <strong>Condição:</strong> ${a.condicao}<br> 
         <strong>Mês/Ano:</strong> ${a.mes_avalia}/${a.ano_avalia}
       </div>
     `;
@@ -202,7 +203,7 @@ require([
 
   // Filtro manual
   btnFiltrar.onclick = async () => {
-    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND rod = '${rodovia.value}' AND tipo = '${tipo.value}'`;
+    const where = `ano_avalia = '${ano.value}' AND mes_avalia = '${mes.value}' AND rod = '${rod.value}' AND tipo = '${tipo.value}'`;
     const res = await executarConsulta(where);
     ocorrencias = res.features;
     indiceAtual = 0;
