@@ -117,12 +117,13 @@ require([
 
 
     // Filtros
-    const anos = new Set(), meses = new Set(), rods = new Set(), tipos = new Set();
+    const anos = new Set(), meses = new Set(), rods = new Set(), tipos = new Set(), condicao = new Set();
     ocorrencias.forEach(f => {
       anos.add(f.attributes.ano_avalia);
       meses.add(f.attributes.mes_avalia);
       rods.add(f.attributes.rod);
       tipos.add(f.attributes.tipo);
+      condicao.add(f.attributes.condicao);
     });
 
     preencher("ano", anos);
