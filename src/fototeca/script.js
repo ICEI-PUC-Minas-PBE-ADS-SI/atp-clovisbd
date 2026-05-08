@@ -89,7 +89,7 @@ require([
     layer.definitionExpression = where;
     const q = layer.createQuery();
     q.where = where;
-    q.outFields = ['*'];
+    q.outFields = ["*"];
     q.orderByFields = ["km ASC"];
     return layer.queryFeatures(q);
   }
