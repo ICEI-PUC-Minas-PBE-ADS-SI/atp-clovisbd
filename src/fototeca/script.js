@@ -17,7 +17,7 @@ require([
   "esri/layers/GraphicsLayer",
   "esri/Graphic"
 ], function (Map, MapView, FeatureLayer, GraphicsLayer, Graphic) {
-  const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/MapServer/0";
+  const restUrl = "https://observatorio.infraestrutura.mg.gov.br/server/rest/services/Hosted/ICM_PONTO_MAIO_2025_PILOTO_SREMG/FeatureServer/0";
 
   // -----------------------------------------------------
   // Símbolos por tipo (cores corrigidas)
